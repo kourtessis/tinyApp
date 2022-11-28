@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/kourtessis/tinyApp/issues"
   },
-  "homepage": "https://github.com/kourtessis/tinyApp#readme"
+  "homepage": "https://github.com/kourtessis/tinyApp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
