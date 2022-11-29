@@ -6,8 +6,8 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 const generateRandomString = () => {
-  return ((Math.random() + 1)* 0x10000).toString(36).substring(6);
-}
+  return ((Math.random() + 1) * 0x10000).toString(36).substring(6);
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -40,28 +40,28 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  const randomName = generateRandomString()
-  const newLongUrl = req.body.longURL
-  if (newLongUrl.slice(0,8) === 'https://' || newLongUrl.slice(0,7) === 'http://') {
-    urlDatabase[randomName] = newLongUrl  // check if contains http: already
+  const randomName = generateRandomString();
+  const newLongUrl = req.body.longURL;
+  if (newLongUrl.slice(0, 8) === 'https://' || newLongUrl.slice(0, 7) === 'http://') {
+    urlDatabase[randomName] = newLongUrl;  // check if contains http: already
   } else {
-    urlDatabase[randomName] = `https://${newLongUrl}`  // check if contains https: already
+    urlDatabase[randomName] = `https://${newLongUrl}`;  // check if contains https: already
   }
-  res.redirect(`/urls/${randomName}`)
-  console.log(urlDatabase) 
+  res.redirect(`/urls/${randomName}`);
+  console.log(urlDatabase);
 });
 
 app.get("/urls/:id", (req, res) => { // redirect to summary ID page
-  const id = req.params.id
-  const longURL = urlDatabase[id]
-  const templateVars = { id, longURL};
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  const templateVars = { id, longURL };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id
-  const longURL = urlDatabase[id]
-  console.log(urlDatabase[id])
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  console.log(urlDatabase[id]);
   res.redirect(longURL);
 });
 
@@ -69,4 +69,16 @@ app.post("/urls/:id/delete", (req, res) => {
   const shortUrl = req.params.id;
   delete urlDatabase[shortUrl];
   res.redirect(`/urls`);
+});
+
+app.post("/urls/:id/edit", (req, res) => {
+  const shortUrl = req.params.id;
+  const newLongUrl = req.body.longUrl
+  
+  if (newLongUrl.slice(0, 8) === 'https://' || newLongUrl.slice(0, 7) === 'http://') {
+    urlDatabase[shortUrl] = newLongUrl;  // adds http: into input feild so http not manually required
+  } else {
+    urlDatabase[shortUrl] = `https://${newLongUrl}`;  // check if contains https: already
+  }
+  res.redirect('/urls');
 });
