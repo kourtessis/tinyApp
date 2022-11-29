@@ -45,13 +45,13 @@ app.post("/urls", (req, res) => {
   if (newLongUrl.slice(0,8) === 'https://' || newLongUrl.slice(0,7) === 'http://') {
     urlDatabase[randomName] = newLongUrl  // check if contains http: already
   } else {
-    urlDatabase[randomName] = `https://${newLongUrl}`  // check if contains http: already
+    urlDatabase[randomName] = `https://${newLongUrl}`  // check if contains https: already
   }
   res.redirect(`/urls/${randomName}`)
-  console.log(urlDatabase)
+  console.log(urlDatabase) 
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get("/urls/:id", (req, res) => { // redirect to summary ID page
   const id = req.params.id
   const longURL = urlDatabase[id]
   const templateVars = { id, longURL};
