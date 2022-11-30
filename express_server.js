@@ -120,7 +120,13 @@ app.get("/register", (req,res) => {
 app.post("/register", (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
-  res.cookie('email', email)
-  res.cookie('password', password)
-  res.redirect('/register')
+  const newUser = {
+    id: generateRandomString(),
+    email: email, 
+    password: password
+  }
+  users[newUser.id] = newUser
+  // console.log(users)
+  res.cookie('user_id', newUser.id)
+  res.redirect('/urls')
 });
