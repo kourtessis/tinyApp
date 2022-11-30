@@ -13,8 +13,11 @@
           <% if(username){%>
             <div>
               <span>Logged in as: <%= username %> </span>
+              <form action="/logout" method="post" name="LoginForm">
+                <input type="submit" value="Logout">
+              </form>
             </div>
-            <%} else {%> 
+            <%} else {%>
               <form action="/login" method="post" name="LoginForm">
                 <label for="username">
                   <!-- font awesome icon -->

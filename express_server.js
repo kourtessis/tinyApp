@@ -88,6 +88,10 @@ app.post("/urls/:id/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie('username', username) // how to set cookie
-  console.log(req.body)
+  res.redirect('/urls');
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie('username') 
   res.redirect('/urls');
 });
