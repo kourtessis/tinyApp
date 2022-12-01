@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
+const e = require("express");
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -18,12 +19,22 @@ const urlDatabase = {
 
 const findUserByEmail = (email) => {
   for (const user in users) {
-    if (email === users[user].email){
+    if (email === users[user].email) {
       return user;
     }
-  } 
+  }
   return null;
 };
+
+const emptyFields = (req, res) => {
+
+  if (!req.body.email || !req.body.password) {
+    //respond with an error
+    res.status(400).send("400 Bad Request - ");
+    return;
+  }
+}
+
 const randomName = generateRandomString();
 const users = {
   userRandomID: {
@@ -55,8 +66,8 @@ app.listen(PORT, () => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies["user_id"]];
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  const user = req.cookies["user_id"];
+  const templateVars = { urls: urlDatabase, user };
   res.render("urls_index", templateVars);
 });
 
@@ -111,20 +122,41 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username); // how to set cookie
+  const email = req.body.email;
+  const password = req.body.password;
+  let userId = findUserByEmail(email); 
+  emptyFields(req, res)
+
+  // if (!email || !password) {
+  //   //respond with an error
+  //   res.status(400).send("400 Bad Request - ");
+  // }
+  if (!userId) {
+    return res.status(400).send("User not found!")
+  }
+  if (password !== users[userId].password) {
+    return res.status(400).send("Incorrect password")
+  }
+
+  const  cookieObj = {
+    email,
+    password,
+    id: userId
+  };
+  console.log(cookieObj)
+  res.cookie('user_id', cookieObj); 
   res.redirect('/urls');
 });
 
 app.get("/login", (req, res) => {
   const user = req.body.email;
-  const templateVars = { user }
+  const templateVars = { user };
   res.render("urls_login", templateVars);
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
+  res.clearCookie('user_id');
+  res.redirect('/login');
 });
 
 
@@ -137,11 +169,11 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user_id = randomName;
-
-  if (!email || !password) {
-    //respond with an error
-    res.status(400).send("400 Bad Request - ");
-  }
+  emptyFields(req, res);
+  // if (!email || !password) {
+  //   //respond with an error
+  //   res.status(400).send("400 Bad Request - ");
+  // }
   const foundUser = findUserByEmail(email);
   if (foundUser) {
     //respond with error email in use 
@@ -154,7 +186,7 @@ app.post("/register", (req, res) => {
     };
     users[newUser.id] = newUser;
     // console.log(users)
-    res.cookie('user_id', newUser.id);
+    res.cookie('user_id', newUser);
     res.redirect('/urls');
   }
 });
