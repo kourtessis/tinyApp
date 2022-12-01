@@ -9,7 +9,7 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <div style="float:right; right: 30px; position: absolute">
+        <!-- <div style="float:right; right:0; position: absolute"> -->
           <% if(user){%>
             <div>
               <form action="/logout" method="post" name="LoginForm">
@@ -18,16 +18,10 @@
               </form>
             </div>
             <%} else {%>
-              <form action="/login" method="post" name="LoginForm">
-                <label for="username">
-                  <!-- font awesome icon -->
-                  <i class="fas fa-user"></i>
-                </label>
-                <i class="fas fa-lock"></i>
-                </label>
-                <input type="text" name="username" placeholder="username" id="text" required>
-                <input type="submit" value="Login">
-              </form>
+              <div class=" navbar-nav"> 
+              <a class="nav-item nav-link" href="/register">Register</a>
+              <a class="nav-item nav-link" href="/login">Login</a>
+            </div>
               <%}%>
         </div>
       </div>

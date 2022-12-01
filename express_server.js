@@ -55,13 +55,13 @@ app.listen(PORT, () => {
 //   res.send("<html><body>Hello <b>World</b></body></html>\n");
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies["username"]];
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["username"]] };
+  const user = users[req.cookies["user_id"]];
+  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies["username"]] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
@@ -81,7 +81,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => { // redirect to summary ID page
   const id = req.params.id;
   const longURL = urlDatabase[id];
-  const templateVars = { id, longURL, urls: urlDatabase, user: users[req.cookies["username"]] };
+  const templateVars = { id, longURL, urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_show", templateVars);
 });
 
@@ -116,10 +116,17 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');
 });
 
+app.get("/login", (req, res) => {
+  const user = req.body.email;
+  const templateVars = { user }
+  res.render("urls_login", templateVars);
+});
+
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
+
 
 app.get("/register", (req, res) => {
   const templateVars = { user: null };
@@ -133,12 +140,12 @@ app.post("/register", (req, res) => {
 
   if (!email || !password) {
     //respond with an error
-    res.send("error - please input email/password");
+    res.status(400).send("400 Bad Request - ");
   }
   const foundUser = findUserByEmail(email);
   if (foundUser) {
     //respond with error email in use 
-    res.send("Email/password already exists");
+    res.status(400).send("400 Bad Request - email/username in use");
   } else {
     const newUser = {
       id: generateRandomString(),
@@ -147,7 +154,7 @@ app.post("/register", (req, res) => {
     };
     users[newUser.id] = newUser;
     // console.log(users)
-    res.cookie('username', newUser.id);
+    res.cookie('user_id', newUser.id);
     res.redirect('/urls');
   }
 });
