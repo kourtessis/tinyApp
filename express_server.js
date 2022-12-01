@@ -33,7 +33,7 @@ const emptyFields = (req, res) => {
     res.status(400).send("400 Bad Request - ");
     return;
   }
-}
+};
 
 const randomName = generateRandomString();
 const users = {
@@ -48,6 +48,28 @@ const users = {
     password: "dishwasher-funk",
   },
 };
+
+const loggedIn = (req) => {
+  if (!req.cookies.user) {
+    return false;
+  }
+
+  const emailCookie = req.cookies.user.email;
+  const passwordCookie = req.cookies.user.password;
+
+  if (!findUserByEmail(emailCookie)) {
+    return false;
+  }
+
+  const userID = findUserByEmail(emailCookie);
+
+  if (users[userID].password !== passwordCookie) {
+    return false;
+  }
+
+  return true;
+};
+
 
 
 app.get("/", (req, res) => {
@@ -72,14 +94,21 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login");
+  }
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+  // console.log(req.body); // Log the POST request body to the console
+  if (!req.cookies["user_id"]) {
+    return res.send("Sorry, only logged in users can have shorted URLs");
+  }
   const randomName = generateRandomString();
   const newLongUrl = req.body.longURL;
+
   if (newLongUrl.slice(0, 8) === 'https://' || newLongUrl.slice(0, 7) === 'http://') {
     urlDatabase[randomName] = newLongUrl;  // check if contains http: already
   } else {
@@ -124,33 +153,38 @@ app.post("/urls/:id/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userId = findUserByEmail(email); 
-  emptyFields(req, res)
+  let userId = findUserByEmail(email);
+  emptyFields(req, res);
   // if client presses submit will now call emptyFields()
   // if (!email || !password) {
   //   //respond with an error
   //   res.status(400).send("400 Bad Request - ");
   // }
   if (!userId) {
-    return res.status(400).send("User not found!")
+    return res.status(400).send("User not found!");
   }
   if (password !== users[userId].password) {
-    return res.status(400).send("Incorrect password")
+    return res.status(400).send("Incorrect password");
   }
 
-  const  cookieObj = {
+  const cookieObj = {
     email,
     password,
     id: userId
   };
-  console.log(cookieObj)
-  res.cookie('user_id', cookieObj); 
+  console.log(cookieObj);
+  res.cookie('user_id', cookieObj);
   res.redirect('/urls');
 });
 
 app.get("/login", (req, res) => {
   const user = req.body.email;
   const templateVars = { user };
+
+  if (loggedIn(req)) {
+    return res.redirect('/urls');
+  }
+
   res.render("urls_login", templateVars);
 });
 
@@ -162,7 +196,12 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = { user: null };
+  if (loggedIn(req)) {
+    return res.redirect('/urls');
+  }
+
   res.render("urls_register", templateVars);
+
 });
 
 app.post("/register", (req, res) => {
@@ -191,4 +230,4 @@ app.post("/register", (req, res) => {
   }
 });
 
-//git comment 2 
+//
