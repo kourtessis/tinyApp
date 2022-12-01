@@ -126,7 +126,7 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   let userId = findUserByEmail(email); 
   emptyFields(req, res)
-
+  // if client presses submit will now call emptyFields()
   // if (!email || !password) {
   //   //respond with an error
   //   res.status(400).send("400 Bad Request - ");
@@ -190,3 +190,5 @@ app.post("/register", (req, res) => {
     res.redirect('/urls');
   }
 });
+
+///why!
