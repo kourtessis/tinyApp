@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
 const { fileLoader } = require("ejs");
+const bcrypt = require("bcryptjs");
 
 
 app.set("view engine", "ejs");
@@ -42,8 +43,8 @@ const users = {
   },
   user2RandomID: {
     id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
+    email: "b@b.com",
+    password: "12345",
   },
 };
 
@@ -63,12 +64,12 @@ const urlDatabase = {
 };
 
 const loggedIn = (req) => {
-  if (!req.cookies.user) {
+  if (!req.cookies.user_id) {
     return false;
   }
 
-  const emailCookie = req.cookies.user.email;
-  const passwordCookie = req.cookies.user.password;
+  const emailCookie = req.cookies.user_id.email;
+  const passwordCookie = req.cookies.user_id.password;
 
   if (!findUserByEmail(emailCookie)) {
     return false;
@@ -114,8 +115,9 @@ app.get("/urls", (req, res) => {
   // filtering the URL based on user ID
   // console.log(user)
   const filteredUrlDatabase = urlsForUser(userId);
-  console.log(filteredUrlDatabase);
-  const templateVars = { urls: filteredUrlDatabase, user: users.userId };
+  console.log("checking", users.userId);
+  
+  const templateVars = { urls: filteredUrlDatabase, user: users[userId] };
   res.render("urls_index", templateVars);
 });
 
@@ -230,8 +232,8 @@ app.post("/login", (req, res) => {
   if (!userId) {
     return res.status(400).send("User not found!");
   }
-  console.log(users[userId].password);
-  console.log(req.body.password);
+  console.log(users[userId].password)
+  console.log(req.body.password)
   //comparing plain password to hash
   if (!bcrypt.compareSync(req.body.password, users[userId].password)) {
 
@@ -276,15 +278,19 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, 10); 
   const user_id = generateRandomString();
   emptyFields(req, res);
+  // if (!email || !password) {
+  //   //respond with an error 
+  //   res.status(400).send("400 Bad Request");
+  // }
   const foundUser = findUserByEmail(email);
   if (foundUser) {
     //respond with error email in use 
     res.status(400).send("400 User Already in Database");
   } else {
-    const newUser = {
+    const newUser = { 
       id: user_id,
       email: email,
       password: hashedPassword
@@ -295,3 +301,6 @@ app.post("/register", (req, res) => {
     res.redirect('/urls');
   }
 });
+ 
+
+
