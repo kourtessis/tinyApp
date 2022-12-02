@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
-const { fileLoader } = require("ejs");
+// const { fileLoader } = require("ejs");
 const bcrypt = require("bcryptjs");
 
 const {
@@ -47,10 +47,6 @@ const urlDatabase = {
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "userRandomID",
   },
 };
 
@@ -140,7 +136,7 @@ app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   if (!urlDatabase[id].longURL) {
     return res.send("Short URL doesn't exist!");
-  };
+  }
   const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
@@ -150,7 +146,7 @@ app.post("/urls/:id/delete", (req, res) => {   // redirect to  summary id page
   const databaseObject = urlDatabase[req.params.id];
   const deleteshortUrl = req.params.id;
   const filteredUrlDatabase = urlsForUser(userId, urlDatabase);
-  const doesExist = false; // the url does not belong to that obj 
+  const doesExist = false; // the url does not belong to that obj
   console.log(filteredUrlDatabase);
   if (!databaseObject) {
     return res.status(400).send("User not found!");
@@ -183,14 +179,13 @@ app.post("/urls/:id/edit", (req, res) => {
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = req.body.password;  //not in use but afraid to delete
   let userId = findUserByEmail(email, users);
   emptyFields(req, res);
   if (!userId) {
     return res.status(400).send("User not found!");
   }
-  console.log(users[userId].password);
-  console.log(req.body.password);
+
   //comparing plain password to hash
   if (!bcrypt.compareSync(req.body.password, users[userId].password)) {
 
@@ -239,12 +234,12 @@ app.post("/register", (req, res) => {
   const user_id = generateRandomString();
   emptyFields(req, res);
   // if (!email || !password) {
-  //   //respond with an error 
+  //   //respond with an error
   //   res.status(400).send("400 Bad Request");
   // }
   const foundUser = findUserByEmail(email, users);
   if (foundUser) {
-    //respond with error email in use 
+    //respond with error email in use
     res.status(400).send("400 User Already in Database");
   } else {
     const newUser = {

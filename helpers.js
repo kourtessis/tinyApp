@@ -1,8 +1,7 @@
 const generateRandomString = () => {
   return ((Math.random() + 1) * 0x10000).toString(36).substring(6);
+
 };
-
-
 
 const findUserByEmail = (email, users) => {
   for (const user in users) {
