@@ -16,7 +16,7 @@ const emptyFields = (req, res) => {
 
   if (!req.body.email || !req.body.password) {
     //respond with an error
-    res.status(400).send("400 Bad Request - ");
+    res.status(400).send("400 Bad Request: Please enter a valid username/password");
     return;
   }
 };

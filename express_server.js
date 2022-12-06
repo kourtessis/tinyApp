@@ -52,7 +52,11 @@ const urlDatabase = {
 
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userId = req.session["user_id"];
+  if (!userId) {
+  return res.redirect("/login");
+}
+  res.redirect("/urls")
 });
 
 app.listen(PORT, () => {
@@ -69,7 +73,7 @@ app.listen(PORT, () => {
 app.get("/urls", (req, res) => {
   const userId = req.session["user_id"];
   if (!userId)
-    return res.status(401).send("User not logged in");
+  return res.redirect("/login");
   // filtering the URL based on user ID
   // console.log(user)
   const filteredUrlDatabase = urlsForUser(userId, urlDatabase);
@@ -110,6 +114,10 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const userId = req.session["user_id"];
+  if (!urlDatabase[id]){
+    return res.status(404).send("Error 404, Not Found!")
+  }
+
   if (!userId) {
     return res.send("Please login to view this content.");
   }
@@ -168,12 +176,6 @@ app.post("/urls/:id/edit", (req, res) => {
     return res.status(400).send("Sorry you need to log in to edit");
   }
   urlDatabase[shortUrl] = { longURL: newLongUrl, userID: req.session["user_id"] };
-
-  // if (newLongUrl.slice(0, 8) === 'https://' || newLongUrl.slice(0, 7) === 'http://') {
-  //   urlDatabase[shortUrl] = { longURL: newLongUrl, userID: req.cookies["user_id"] };  // adds http: into input feild so http not manually required
-  // } else {
-  //   urlDatabase[shortUrl] = { longURL: `https://${newLongUrl}`, userID: req.cookies["user_id"] };  // check if contains https: already
-  // }
   res.redirect('/urls');
 });
 
@@ -185,17 +187,11 @@ app.post("/login", (req, res) => {
   if (!userId) {
     return res.status(400).send("User not found!");
   }
-
   //comparing plain password to hash
   if (!bcrypt.compareSync(req.body.password, users[userId].password)) {
 
     return res.status(400).send("Incorrect password");
   }
-  // const cookieObj = {
-  //   email,
-  //   password,
-  //   id: userId,
-  // };
   req.session["user_id"] = userId;
   res.redirect("/urls");
 });
@@ -233,10 +229,6 @@ app.post("/register", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   const user_id = generateRandomString();
   emptyFields(req, res);
-  // if (!email || !password) {
-  //   //respond with an error
-  //   res.status(400).send("400 Bad Request");
-  // }
   const foundUser = findUserByEmail(email, users);
   if (foundUser) {
     //respond with error email in use
@@ -248,7 +240,6 @@ app.post("/register", (req, res) => {
       password: hashedPassword
     };
     users[newUser.id] = newUser;
-    // console.log(users)
     req.session['user_id'] = user_id;
     res.redirect('/urls');
   }
